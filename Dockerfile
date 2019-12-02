@@ -1,4 +1,4 @@
-FROM python:3.7-slim-stretch
+FROM debian:latest
 LABEL maintainer="praveenksarathi"
 
 # Never prompts the user for choices on installation/configuration of packages
@@ -19,6 +19,15 @@ ENV LC_ALL en_US.UTF-8
 ENV LC_CTYPE en_US.UTF-8
 ENV LC_MESSAGES en_US.UTF-8
 
+RUN  apt update -y && \
+     apt install -y python3 && \
+     apt install -y python3-pip && \
+     update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
+     update-alternatives  --set python /usr/bin/python3 && \
+     update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1 && \
+     update-alternatives  --set pip /usr/bin/pip3
+
+
 RUN set -ex \
     && buildDeps=' \
         freetds-dev \
@@ -29,9 +38,9 @@ RUN set -ex \
         libpq-dev \
         git \
     ' \
-    && apt-get update -yqq \
-    && apt-get upgrade -yqq \
-    && apt-get install -yqq --no-install-recommends \
+    && apt update -yqq \
+    && apt upgrade -yqq \
+    && apt install -yqq --no-install-recommends \
         $buildDeps \
         freetds-bin \
         build-essential \
@@ -45,7 +54,7 @@ RUN set -ex \
     && locale-gen \
     && update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 \
     && useradd -ms /bin/bash -d ${AIRFLOW_USER_HOME} airflow \
-    && pip install -U pip setuptools wheel \
+    && pip install setuptools wheel \
     && pip install pytz \
     && pip install pyOpenSSL \
     && pip install ndg-httpsclient \
@@ -53,9 +62,9 @@ RUN set -ex \
     && pip install apache-airflow[crypto,celery,postgres,hive,jdbc,mysql,ssh${AIRFLOW_DEPS:+,}${AIRFLOW_DEPS}]==${AIRFLOW_VERSION} \
     && pip install 'redis==3.2' \
     && if [ -n "${PYTHON_DEPS}" ]; then pip install ${PYTHON_DEPS}; fi \
-    && apt-get purge --auto-remove -yqq $buildDeps \
-    && apt-get autoremove -yqq --purge \
-    && apt-get clean \
+    && apt purge --auto-remove -yqq $buildDeps \
+    && apt autoremove -yqq --purge \
+    && apt clean \
     && rm -rf \
         /var/lib/apt/lists/* \
         /tmp/* \

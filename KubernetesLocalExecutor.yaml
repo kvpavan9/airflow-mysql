@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: airflow-local-executor-webserver
-        image: praveenksarathi/puck-airflow:latest
+        image: praveenksarathi/airflow-debian:latest
         imagePullPolicy: Always
         env:
         - name: MYSQL_HOST
