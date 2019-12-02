@@ -1,0 +1,72 @@
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: airflow
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: airflow-local-executor
+  namespace: airflow
+spec:
+  selector:
+    matchLabels:
+      app: airflow-local-executor
+  template:
+    metadata:
+      labels:
+        name: airflow-local-executor
+        app: airflow-local-executor
+    spec:
+      containers:
+      - name: airflow-local-executor-webserver
+        image: praveenksarathi/puck-airflow:latest
+        imagePullPolicy: Always
+        env:
+        - name: MYSQL_HOST
+          value: '10.160.0.35'
+        - name: MYSQL_PORT
+          value: '3306'
+        - name: MYSQL_DB
+          value: airflow
+        - name: MYSQL_USER
+          value: airflow
+        - name: MYSQL_PASS
+          value: Airflow!2019
+        - name: EXECUTOR
+          value: LocalExecutor
+        readinessProbe:
+          httpGet:
+            path: /admin/
+            port: 8080
+          initialDelaySeconds: 8
+          timeoutSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /admin/
+            port: 8080
+          initialDelaySeconds: 8
+          timeoutSeconds: 10
+        ports:
+        - name: webserver
+          containerPort: 8080
+        command: ["/entrypoint.sh"]
+        args: ["webserver"]
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: airflow-local-executor
+  namespace: airflow
+spec:
+  type: NodePort
+  ports:
+  - name: webserver
+    port: 8080
+    targetPort: webserver
+  selector:
+    app: airflow-local-executor
