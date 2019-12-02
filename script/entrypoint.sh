@@ -16,6 +16,11 @@ wait_for_port() {
   done
 }
 
+if [[ -z "$AIRFLOW__CORE__LOAD_EXAMPLES" && "${LOAD_EX:=n}" == n ]]
+then
+AIRFLOW__CORE__LOAD_EXAMPLES=False
+fi
+
 case "$1" in
   webserver)
     wait_for_port "Mysql" "$MYSQL_HOST" "$MYSQL_PORT"
