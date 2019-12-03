@@ -27,6 +27,15 @@ RUN  apt update -y && \
      update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1 && \
      update-alternatives  --set pip /usr/bin/pip3
 
+RUN apt update && apt install --yes --no-install-recommends \
+    ca-certificates \
+    curl \
+  && echo "deb http://packages.cloud.google.com/apt airflow-praveenksarathi-bucket main" \
+    | tee /etc/apt/sources.list.d/gcsfuse.list \
+  && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
+  && apt update \
+  && apt install --yes gcsfuse \
+  && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
 
 RUN set -ex \
     && buildDeps=' \
