@@ -17,16 +17,8 @@ wait_for_port() {
 }
 
 if [[ -z "$AIRFLOW__CORE__LOAD_EXAMPLES" && "${LOAD_EX:=n}" == n ]]
-<<<<<<< Updated upstream
 then
 AIRFLOW__CORE__LOAD_EXAMPLES=False
-=======
-
-then
-
-AIRFLOW__CORE__LOAD_EXAMPLES=False
-
->>>>>>> Stashed changes
 fi
 
 case "$1" in
