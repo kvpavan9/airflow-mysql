@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-executor
+  namespace: airflow
+spec:
+  selector:
+    matchLabels:
+      app: airflow-executor
+  template:
+    metadata:
+      labels:
+        name: airflow-executor
+        app: airflow-executor
+    spec:
+      containers:
+      - name: airflow-executor-webserver
+        image: 826422597116.dkr.ecr.us-east-2.amazonaws.com/leni-rnd/airflow:latest 
+        imagePullPolicy: Always
+        env:
+        - name: MYSQL_HOST
+          value: mysql
+        - name: MYSQL_PORT
+          value: '3306'
+        - name: MYSQL_DB
+          value: airflow
+        - name: MYSQL_USER
+          value: airflow
+        - name: MYSQL_PASS
+          value: airflow
+        - name: EXECUTOR
+          value: LocalExecutor
+        readinessProbe:
+          httpGet:
+            path: /admin/
+            port: 8080
+          initialDelaySeconds: 8
+          timeoutSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /admin/
+            port: 8080
+          initialDelaySeconds: 8
+          timeoutSeconds: 10
+        ports:
+        - name: webserver
+          containerPort: 8080
+        command: ["/entrypoint.sh"]
+        args: ["webserver"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: airflow-executor
+  namespace: airflow
+spec:
+  type: LoadBalancer
+  ports:
+  - name: webserver
+    port: 8080
+    targetPort: webserver
+  selector:
+    app: airflow-executor
